@@ -1,7 +1,5 @@
 import json
-import os
 import unittest
-import tempfile
 
 from api.app import app, db
 from api.models import Base, Url, Host, Purge
@@ -16,8 +14,6 @@ class AppTestCase(unittest.TestCase):
         Base.metadata.drop_all(bind=db.engine)
         Base.metadata.create_all(bind=db.engine)
 
-        # db.session.add(Host(hostname='host1'))
-        # db.session.add(Host(hostname='host2'))
         db.session.commit()
 
     def test_healthcheck(self):
