@@ -4,7 +4,7 @@ import unittest
 import tempfile
 
 from api.app import app, db
-from api.models import Base, Url, Host
+from api.models import Base, Url, Host, Purge
 
 class AppTestCase(unittest.TestCase):
 
@@ -16,8 +16,8 @@ class AppTestCase(unittest.TestCase):
         Base.metadata.drop_all(bind=db.engine)
         Base.metadata.create_all(bind=db.engine)
 
-        db.session.add(Host(hostname='host1'))
-        db.session.add(Host(hostname='host2'))
+        # db.session.add(Host(hostname='host1'))
+        # db.session.add(Host(hostname='host2'))
         db.session.commit()
 
     def test_healthcheck(self):
@@ -89,6 +89,34 @@ class AppTestCase(unittest.TestCase):
             'hostname': 'myservername'
         })
         self.assertEqual(response.status_code, 500)
+
+    def test_get_caches_to_purge_in_a_host(self):
+        ''' Get the list of urls to be purged by a specific host '''
+
+        hostname = 'myservername'
+        # these 2 urls should return on the GET below
+        new_url_1 = 'http://domain.com/path/to/purge_1'
+        new_url_2 = 'http://domain.com/path/to/purge_2'
+
+        # this should not return on the GET because it was purged
+        purged_url = 'http://domain.com/path/already_purge'
+
+        db.session.add(Url(id=1, url=purged_url))
+        db.session.add(Url(id=2, url=new_url_1))
+        db.session.add(Url(id=3, url=new_url_2))
+        db.session.add(Host(id=1, hostname=hostname, ip='1.1.1.1'))
+        db.session.add(Purge(id=1, url_id=1, host_id=1))
+        db.session.commit()
+
+        response = self.client.get('/hosts/pending_purge', query_string={
+            'hostname': hostname
+        })
+
+        self.assertEqual(response.status_code, 200)
+
+        computed = json.loads(response.get_data(as_text=True))
+        self.assertEqual(computed, [new_url_1, new_url_2])
+        self.assertNotIn(purged_url, computed)
 
     def tearDown(self):
         db.session.remove()

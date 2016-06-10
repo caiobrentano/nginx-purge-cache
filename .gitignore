@@ -14,3 +14,6 @@ __pycache__/
 # environ file
 environ
 .env
+
+# teste database
+api.sqlite

@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from urllib.parse import urlparse
 
 from api import models
-from api.models import Url, Host
+from api.models import Url, Host, Purge
 from common import utils
 
 app = Flask(__name__)
@@ -64,3 +64,18 @@ def add_host():
     db.session.commit()
 
     return '', 201
+
+@app.route('/hosts/pending_purge', methods=['GET'])
+def get_host_pending_purge():
+    hostname = request.args.get('hostname')
+
+    # Get host id
+    host = db.session.query(Host).filter_by(hostname=hostname).first()
+    # Get all urls id that the host already purged
+    subquery = db.session.query(Purge.url_id).filter(Purge.host_id == host.id)
+
+    response = []
+    for url in db.session.query(Url).filter(~Url.id.in_(subquery)):
+        response.append(url.url)
+
+    return jsonify(response)
