@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from urllib.parse import urlparse
 
 from api import models
-from api.models import Url
+from api.models import Url, Host
 from common import utils
 
 app = Flask(__name__)
@@ -49,3 +49,18 @@ def check_url():
         })
 
     return jsonify(response)
+
+@app.route('/hosts/add', methods=['POST'])
+def add_host():
+    """ Register a new host in database """
+    hostname = request.form.get('hostname')
+    ip = request.form.get('ip')
+
+    if not hostname or not ip:
+        return 'Missing information', 500
+
+    host = Host(hostname=hostname, ip=ip)
+    db.session.add(host)
+    db.session.commit()
+
+    return '', 201
