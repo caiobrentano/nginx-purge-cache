@@ -15,13 +15,13 @@ logger = utils.get_logger(__name__)
 
 @app.route('/healthcheck', methods=['GET'])
 def healthcheck():
-    """ Retuns OK if the API is running """
+    ''' Retuns OK if the API is running '''
     logger.info('healthcheck')
     return 'OK'
 
 @app.route('/add', methods=['POST'])
 def add_url():
-    """ Saves a URL to be purged """
+    ''' Saves a URL to be purged '''
     param_url = request.form.get('url')
     param_user = request.form.get('user', 'unknown')
 
@@ -37,7 +37,7 @@ def add_url():
 
 @app.route('/check', methods=['GET'])
 def check_url():
-    """ Retrieves the status of a URL previously registered to be purged """
+    ''' Retrieves the status of a URL previously registered to be purged '''
     param_url = request.args.get('url')
 
     response = []
@@ -52,7 +52,7 @@ def check_url():
 
 @app.route('/hosts/add', methods=['POST'])
 def add_host():
-    """ Register a new host in database """
+    ''' Register a new host in database '''
     hostname = request.form.get('hostname')
     ip = request.form.get('ip')
 
@@ -67,6 +67,7 @@ def add_host():
 
 @app.route('/hosts/pending_purge', methods=['GET'])
 def get_host_pending_purge():
+    ''' Returns a list with all URLs not yet purged for a specific hostname '''
     hostname = request.args.get('hostname')
 
     # Get host id
