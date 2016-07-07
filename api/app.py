@@ -52,6 +52,32 @@ def check_url():
 
     return jsonify(response)
 
+@app.route('/purge', methods=['POST'])
+def purge_url():
+    ''' Notify that an URL was purged by a host '''
+
+    param_url = request.form.get('url')
+    param_hostname = request.form.get('hostname')
+    param_cmd_output = request.form.get('command_output')
+
+    url = db.session.query(Url).filter(Url.url == param_url).first()
+    host = db.session.query(Host).filter(Host.hostname == param_hostname).first()
+
+    if not url:
+        return 'URL not found', 500
+
+    if not host:
+        return 'Host not found', 500
+
+    purge = Purge(url_id=url.id,
+                  host_id=host.id,
+                  command_output=param_cmd_output)
+
+    db.session.add(purge)
+    db.session.commit()
+
+    return '', 201
+
 @app.route('/hosts/add', methods=['POST'])
 def add_host():
     ''' Register a new host in database '''

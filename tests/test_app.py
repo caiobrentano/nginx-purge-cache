@@ -133,6 +133,23 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(computed, [new_url_1, new_url_2])
         self.assertNotIn(purged_url, computed)
 
+    def test_notify_purged_url(self):
+        hostname = 'myservername'
+        url = 'http://domain.com/path/to/purge'
+
+        # Populate DB for test
+        db.session.add(Url(id=1, url=url))
+        db.session.add(Host(id=1, hostname=hostname, ip='1.1.1.1'))
+        db.session.commit()
+
+        response = self.client.post('/purge', data={
+            'hostname': 'myservername',
+            'url': 'http://domain.com/path/to/purge',
+            'command_output': 'result_from_purge_command',
+        })
+
+        self.assertEqual(response.status_code, 201)
+
     def tearDown(self):
         db.session.remove()
         db.drop_all()

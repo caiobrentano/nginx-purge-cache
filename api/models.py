@@ -19,6 +19,7 @@ class Purge(Base):
     id = Column(Integer, primary_key=True)
     url_id = Column(Integer)
     host_id = Column(Integer)
+    command_output = Column(String(255))
 
     purged_at = Column(DateTime, default=datetime.datetime.utcnow)
 
