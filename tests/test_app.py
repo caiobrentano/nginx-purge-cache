@@ -73,6 +73,25 @@ class AppTestCase(unittest.TestCase):
         db_host = db.session.query(Host).filter_by(hostname=hostname, ip=ip).first()
         self.assertEqual(db_host.hostname, hostname)
 
+    def test_add_duplicated_host(self):
+        hostname = 'myservername'
+        ip = '1.1.1.1'
+
+        # create a new host
+        response = self.client.post('/hosts/add', data={
+            'hostname': hostname,
+            'ip': ip
+        })
+
+        # try to create the same host
+        response = self.client.post('/hosts/add', data={
+            'hostname': hostname,
+            'ip': ip
+        })
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.get_data(as_text=True), 'Duplicated host')
+
     def test_add_new_host_with_missing_information(self):
         # missing hostname
         response = self.client.post('/hosts/add', data={

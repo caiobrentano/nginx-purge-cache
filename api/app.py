@@ -1,3 +1,5 @@
+import sqlalchemy
+
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from urllib.parse import urlparse
@@ -61,7 +63,11 @@ def add_host():
 
     host = Host(hostname=hostname, ip=ip)
     db.session.add(host)
-    db.session.commit()
+
+    try:
+        db.session.commit()
+    except sqlalchemy.exc.IntegrityError:
+        return 'Duplicated host', 500
 
     return '', 201
 

@@ -26,7 +26,7 @@ class Host(Base):
     __tablename__ = 'hosts'
 
     id = Column(Integer, primary_key=True)
-    hostname = Column(String(255))
+    hostname = Column(String(255), unique=True)
     ip = Column(String(255))
 
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
