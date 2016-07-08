@@ -28,7 +28,17 @@ curl -d'url=http://localhost/container/object&user=username' http://localhost:50
 curl http://localhost:5000/check?url=http://localhost/container/object
 ```
 
-## Notify purged URL (from NGINX host)
+## Adding Host
+```
+curl -d'hostname=ngxin_host&ip=10.0.0.1' http://localhost:5000/hosts/add
+```
+
+## Checking pending urls to be purged in a NGINX host
+```
+curl http://localhost:5000/hosts/pending_purge?hostname=ngxin_host
+```
+
+## Notify purged URL in a NGINX host
 ```
 curl -d'url=http://localhost/container/object&hostname=ngxin_host&command_output=result_from_command' http://localhost:5000/purge
 ```
