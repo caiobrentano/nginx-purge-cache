@@ -23,14 +23,39 @@ class AppTestCase(unittest.TestCase):
 
     def test_post_url(self):
         url = 'http://domain.com/path/to/purge'
+        user = 'someone else'
         response = self.client.post('/add', data={
-            'url': url
+            'url': url,
+            'user': user
         })
+
         self.assertEqual(response.status_code, 201)
 
         # Check if it was saved on db
         db_url = db.session.query(Url).filter_by(url=url).first()
         self.assertEqual(db_url.url, url)
+        self.assertEqual(db_url.created_by, user)
+
+    def test_post_list_of_urls(self):
+        url_1 = 'http://domain.com/path/to/purge_1'
+        url_2 = 'http://domain.com/path/to/purge_2'
+        user = 'someone else'
+        response = self.client.post('/add',
+            content_type='application/json',
+            data=json.dumps({
+                'url': [url_1, url_2],
+                'user': user,
+            }),
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        # Check if it was saved on db
+        db_urls = db.session.query(Url).filter(Url.url.in_([url_1, url_2])).all()
+
+        for db_url in db_urls:
+            self.assertIn(db_url.url, [url_1, url_2])
+            self.assertEqual(db_url.created_by, user)
 
     def test_post_invalid_url(self):
         response = self.client.post('/add', data={

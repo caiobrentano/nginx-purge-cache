@@ -24,15 +24,22 @@ def healthcheck():
 @app.route('/add', methods=['POST'])
 def add_url():
     ''' Saves a URL to be purged '''
-    param_url = request.form.get('url')
-    param_user = request.form.get('user', 'unknown')
+    if request.headers['content-type'] == 'application/json':
+        json_data = request.get_json()
+        param_urls = json_data['url']
+        param_user = json_data['user']
+    else:
+        param_urls = [request.form.get('url')]
+        param_user = request.form.get('user')
 
-    parsed = urlparse(param_url)
-    if not parsed.scheme or not parsed.netloc:
-        return 'Malformed url', 500
+    for param_url in param_urls:
+        parsed = urlparse(param_url)
+        if not parsed.scheme or not parsed.netloc:
+            return 'Malformed url', 500
 
-    url = Url(url=param_url, created_by=param_user)
-    db.session.add(url)
+        url = Url(url=param_url, created_by=param_user)
+        db.session.add(url)
+
     db.session.commit()
 
     return '', 201
