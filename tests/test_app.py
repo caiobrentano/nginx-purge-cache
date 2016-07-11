@@ -147,14 +147,14 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(computed, [new_url_1, new_url_2])
         self.assertNotIn(purged_url, computed)
 
-    # def test_get_caches_pending_to_purge_for_a_new_host(self):
-    #     hostname = 'myservername_2'
-    #
-    #     response = self.client.get('/hosts/pending_purge', query_string={
-    #         'hostname': hostname
-    #     })
-    #
-    #     self.assertEqual(response.status_code, 200)
+    def test_get_caches_pending_to_purge_for_a_new_host(self):
+        hostname = 'myservername_2'
+
+        response = self.client.get('/hosts/pending_purge', query_string={
+            'hostname': hostname
+        })
+
+        self.assertEqual(response.status_code, 200)
 
     def test_notify_purged_url(self):
         hostname = 'myservername'

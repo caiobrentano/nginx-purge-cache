@@ -20,6 +20,18 @@ db = SQLAlchemy(app)
 
 logger = utils.get_logger(__name__)
 
+def add_host(hostname):
+    ''' Add host do DB '''
+    host = Host(hostname=hostname)
+    db.session.add(host)
+
+    try:
+        db.session.commit()
+    except sqlalchemy.exc.IntegrityError:
+        return 'Duplicated host', 500
+
+    return '', 201
+
 @app.route('/healthcheck', methods=['GET'])
 def healthcheck():
     ''' Retuns OK if the API is running '''
@@ -91,22 +103,14 @@ def purge_url():
     return '', 201
 
 @app.route('/hosts/add', methods=['POST'])
-def add_host():
+def add_host_rout():
     ''' Register a new host in database '''
     hostname = request.form.get('hostname')
 
     if not hostname:
         return 'Missing information', 500
 
-    host = Host(hostname=hostname)
-    db.session.add(host)
-
-    try:
-        db.session.commit()
-    except sqlalchemy.exc.IntegrityError:
-        return 'Duplicated host', 500
-
-    return '', 201
+    return add_host(hostname)
 
 @app.route('/hosts/pending_purge', methods=['GET'])
 def get_host_pending_purge():
@@ -115,6 +119,15 @@ def get_host_pending_purge():
 
     # Get host id
     host = db.session.query(Host).filter_by(hostname=hostname).first()
+
+    # Register host if it is not found
+    if not host:
+        response, status_code = add_host(hostname)
+        if status_code != 201:
+            return 'Host not found', 500
+
+        host = db.session.query(Host).filter_by(hostname=hostname).first()
+
     # Get all urls id that the host already purged
     subquery = db.session.query(Purge.url_id).filter(Purge.host_id == host.id)
 
