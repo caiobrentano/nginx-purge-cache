@@ -45,5 +45,5 @@ def purge(hostname):
 
             _ = urllib.urlopen(notify_url, params)
 
-if __name__ == 'main':
+if __name__ == '__main__':
     purge(socket.gethostname())

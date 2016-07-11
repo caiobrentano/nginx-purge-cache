@@ -15,6 +15,7 @@ python run.py
 cd nginx-purge-cache
 export PYTHONPATH=$PYTHONPATH:$(pwd)
 python tests/test_app.py
+python tests/test_purge_urls.py
 ```
 
 # Examples:
@@ -30,7 +31,7 @@ curl http://localhost:5000/check?url=http://localhost/container/object
 
 ## Adding Host
 ```
-curl -d'hostname=ngxin_host&ip=10.0.0.1' http://localhost:5000/hosts/add
+curl -d'hostname=ngxin_host' http://localhost:5000/hosts/add
 ```
 
 ## Checking pending urls to be purged in a NGINX host
