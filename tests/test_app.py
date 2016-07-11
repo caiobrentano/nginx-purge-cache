@@ -156,6 +156,9 @@ class AppTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+        computed = json.loads(response.get_data(as_text=True))
+        self.assertEqual(computed, [])
+
     def test_notify_purged_url(self):
         hostname = 'myservername'
         url = 'http://domain.com/path/to/purge'

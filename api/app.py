@@ -126,7 +126,9 @@ def get_host_pending_purge():
         if status_code != 201:
             return 'Host not found', 500
 
-        host = db.session.query(Host).filter_by(hostname=hostname).first()
+        # If host was not previously registered, it doesnt have any PENDING
+        # cache to be purged
+        return jsonify([])
 
     # Get all urls id that the host already purged
     subquery = db.session.query(Purge.url_id).filter(Purge.host_id == host.id)
