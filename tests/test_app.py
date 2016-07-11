@@ -86,32 +86,27 @@ class AppTestCase(unittest.TestCase):
 
     def test_add_new_host(self):
         hostname = 'myservername'
-        ip = '1.1.1.1'
         response = self.client.post('/hosts/add', data={
             'hostname': hostname,
-            'ip': ip
         })
 
         self.assertEqual(response.status_code, 201)
 
         # Check if it was saved on db
-        db_host = db.session.query(Host).filter_by(hostname=hostname, ip=ip).first()
+        db_host = db.session.query(Host).filter_by(hostname=hostname).first()
         self.assertEqual(db_host.hostname, hostname)
 
     def test_add_duplicated_host(self):
         hostname = 'myservername'
-        ip = '1.1.1.1'
 
         # create a new host
         response = self.client.post('/hosts/add', data={
             'hostname': hostname,
-            'ip': ip
         })
 
         # try to create the same host
         response = self.client.post('/hosts/add', data={
             'hostname': hostname,
-            'ip': ip
         })
 
         self.assertEqual(response.status_code, 500)
@@ -120,17 +115,11 @@ class AppTestCase(unittest.TestCase):
     def test_add_new_host_with_missing_information(self):
         # missing hostname
         response = self.client.post('/hosts/add', data={
-            'ip': '1.1.1.1'
+            'hostname': ''
         })
         self.assertEqual(response.status_code, 500)
 
-        # missing ip
-        response = self.client.post('/hosts/add', data={
-            'hostname': 'myservername'
-        })
-        self.assertEqual(response.status_code, 500)
-
-    def test_get_caches_to_purge_in_a_host(self):
+    def test_get_caches_pending_to_purge_for_a_host(self):
         ''' Get the list of urls to be purged by a specific host '''
 
         hostname = 'myservername'
@@ -144,7 +133,7 @@ class AppTestCase(unittest.TestCase):
         db.session.add(Url(id=1, url=purged_url))
         db.session.add(Url(id=2, url=new_url_1))
         db.session.add(Url(id=3, url=new_url_2))
-        db.session.add(Host(id=1, hostname=hostname, ip='1.1.1.1'))
+        db.session.add(Host(id=1, hostname=hostname))
         db.session.add(Purge(id=1, url_id=1, host_id=1))
         db.session.commit()
 
@@ -158,13 +147,22 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(computed, [new_url_1, new_url_2])
         self.assertNotIn(purged_url, computed)
 
+    # def test_get_caches_pending_to_purge_for_a_new_host(self):
+    #     hostname = 'myservername_2'
+    #
+    #     response = self.client.get('/hosts/pending_purge', query_string={
+    #         'hostname': hostname
+    #     })
+    #
+    #     self.assertEqual(response.status_code, 200)
+
     def test_notify_purged_url(self):
         hostname = 'myservername'
         url = 'http://domain.com/path/to/purge'
 
         # Populate DB for test
         db.session.add(Url(id=1, url=url))
-        db.session.add(Host(id=1, hostname=hostname, ip='1.1.1.1'))
+        db.session.add(Host(id=1, hostname=hostname))
         db.session.commit()
 
         response = self.client.post('/purge', data={

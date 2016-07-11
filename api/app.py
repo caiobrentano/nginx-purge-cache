@@ -2,7 +2,12 @@ import sqlalchemy
 
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from urllib.parse import urlparse
+
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    # py2
+    from urlparse import urlparse
 
 from api import models
 from api.models import Url, Host, Purge
@@ -89,12 +94,11 @@ def purge_url():
 def add_host():
     ''' Register a new host in database '''
     hostname = request.form.get('hostname')
-    ip = request.form.get('ip')
 
-    if not hostname or not ip:
+    if not hostname:
         return 'Missing information', 500
 
-    host = Host(hostname=hostname, ip=ip)
+    host = Host(hostname=hostname)
     db.session.add(host)
 
     try:
