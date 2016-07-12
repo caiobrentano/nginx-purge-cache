@@ -1,3 +1,4 @@
+import datetime
 import json
 import unittest
 
@@ -127,14 +128,18 @@ class AppTestCase(unittest.TestCase):
         new_url_1 = 'http://domain.com/path/to/purge_1'
         new_url_2 = 'http://domain.com/path/to/purge_2'
 
-        # this should not return on the GET because it was purged
+        # must not return on GET because it was purged
         purged_url = 'http://domain.com/path/already_purge'
 
-        db.session.add(Url(id=1, url=purged_url))
-        db.session.add(Url(id=2, url=new_url_1))
-        db.session.add(Url(id=3, url=new_url_2))
-        db.session.add(Host(id=1, hostname=hostname))
-        db.session.add(Purge(id=1, url_id=1, host_id=1))
+        # must not return on GET because it was regitered before the host
+        old_url = 'http://domain.com/path/old_url'
+
+        db.session.add(Host(id=1, hostname=hostname, created_at=datetime.datetime(2016, 7, 12)))
+        db.session.add(Url(id=1, url=old_url, created_at=datetime.datetime(2015, 7, 12)))
+        db.session.add(Url(id=2, url=purged_url))
+        db.session.add(Url(id=3, url=new_url_1))
+        db.session.add(Url(id=4, url=new_url_2))
+        db.session.add(Purge(id=1, url_id=2, host_id=1))
         db.session.commit()
 
         response = self.client.get('/hosts/pending_purge', query_string={
@@ -147,7 +152,7 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(computed, [new_url_1, new_url_2])
         self.assertNotIn(purged_url, computed)
 
-    def test_get_caches_pending_to_purge_for_a_new_host(self):
+    def test_get_caches_pending_to_purge_for_a_not_registered_host(self):
         hostname = 'myservername_2'
 
         response = self.client.get('/hosts/pending_purge', query_string={
