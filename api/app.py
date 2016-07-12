@@ -134,7 +134,9 @@ def get_host_pending_purge():
     subquery = db.session.query(Purge.url_id).filter(Purge.host_id == host.id)
 
     response = []
-    for url in db.session.query(Url).filter(~Url.id.in_(subquery)):
+    urls = db.session.query(Url).\
+        filter(~Url.id.in_(subquery), Url.created_at > host.created_at).all()
+    for url in urls:
         response.append(url.url)
 
     return jsonify(response)
