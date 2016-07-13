@@ -9,7 +9,6 @@ appnope==0.1.0
 backports.shutil-get-terminal-size==1.0.0
 click==6.6
 decorator==4.0.9
-gnureadline==6.3.3
 itsdangerous==0.24
 pexpect==4.1.0
 pickleshare==0.7.2
