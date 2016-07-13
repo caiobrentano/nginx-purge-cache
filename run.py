@@ -1,3 +1,6 @@
+import os
+
 from api.app import app
 
-app.run(debug=True)
+debug = True if os.environ.get('DEBUG', False) == 'True' else False
+app.run(debug=debug)
