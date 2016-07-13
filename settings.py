@@ -2,7 +2,8 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'api.sqlite')
+SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI',
+    'sqlite:///' + os.path.join(basedir, 'api.sqlite'))
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 NGINX_CACHE_PATH = os.environ.get('NGINX_CACHE_PATH', '/path/to/nginx/cache')
